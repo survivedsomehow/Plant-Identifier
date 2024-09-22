@@ -3,11 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import CameraComponent from './Component/CameraComponent';
+import CameraComponent from '../components/CameraComponent';
 
 export default function Home() {
   const [image, setImage] = useState(null);
-  console.log('Image state:', image);
   const [imageUrl, setImageUrl] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -17,26 +16,72 @@ export default function Home() {
   const apiKey = "AIzaSyBr1mI21WL76WSKn0zpVRmNCkSuKL9TJvw";
 
   const handleImageUpload = (e) => {
-    console.log('File uploaded:', e.target.files);
     const file = e.target.files[0];
     setImage(file);
     setImageUrl(URL.createObjectURL(file));
   };
 
   const handleImageCapture = (blob, url) => {
-    console.log('Image captured:', blob);
     setImage(blob);
     setImageUrl(url);
   };
 
   const identifyPlant = async (file) => {
-    console.log('Identifying plant...');
-    // ... rest of your code ...
+    if (!file) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+
+      const imageBytes = await file.arrayBuffer();
+      const base64Image = Buffer.from(imageBytes).toString('base64');
+
+      const prompt = `Hey there! Can you help me identify this plant? Please provide the common name, scientific name, a brief description, growth conditions (including light, water, and soil requirements), and any essential care tips. Format your answer like this:
+
+{
+  "plantName": "",
+  "scientificName": "",
+  "description": "",
+  "growthConditions": {
+    "light": "",
+    "water": "",
+    "soil": ""
+  },
+  "careInstructions": ""
+}
+
+I'd really appreciate it if you could fill in the details for me! Thanks in advance!`;
+
+      const result = await model.generateContent([
+        prompt,
+        {
+          inlineData: {
+            data: base64Image,
+            mimeType: file.type,
+          },
+        },
+      ]);
+
+      const responseText = result.response.text();
+
+      // Parse the responseText to extract the name and description
+      const responseJson = JSON.parse(responseText);
+      const { plantName, scientificName, description, growthConditions, careInstructions } = responseJson;
+
+      setResult({ plantName, scientificName, description, growthConditions, careInstructions });
+    } catch (error) {
+      console.error('Error identifying plant:', error);
+      setError('Failed to identify plant. Please try again. ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     if (image) {
-      console.log('Image uploaded:', image);
       identifyPlant(image);
     }
   }, [image]);
@@ -56,7 +101,7 @@ export default function Home() {
               className="hidden"
             />
             <button
-              onClick={() => console.log('Upload button clicked')}
+              onClick={() => fileInputRef.current.click()}
               className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
             >
               Upload Image
@@ -70,8 +115,20 @@ export default function Home() {
           {error && <p className="mt-4 text-red-500">{error}</p>}
           {result && (
             <div className="mt-6">
-              <h2 className="text-2xl font-semibold mb-2">{result.name}</h2>
+              <h2 className="text-2xl font-semibold mb-2">{result.plantName}</h2>
               <p className="text-gray-600">{result.description}</p>
+              <p className="text-gray-600">Scientific Name: {result.scientificName}</p>
+              <p className="text-gray-600">Growth Conditions:</p>
+              <ul className="list-disc pl-5 text-gray-600">
+                <li>Light: {result.growthConditions.light}</li>
+                <li>Water: {result.growthConditions.water}</li>
+                <li>Soil: {result.growthConditions.soil}</li>
+              </ul>
+              <p className="text-gray-600">Care Instructions: {result.careInstructions}</p>
             </div>
           )}
-        </
+        </div>
+      </div>
+    </div>
+  );
+}
