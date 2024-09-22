@@ -31,9 +31,34 @@ export default function Home() {
     }
   }, [image]);
 
-  const captureImage = () => {
-    // Implement camera access (using MediaDevices API, for example)
-  };
+  const captureImage = async () => {
+  try {
+    // Request access to the user's camera
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+    // Create a new canvas element
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Get the first video track from the stream
+    const videoTrack = stream.getVideoTracks()[0];
+
+    // Set the canvas dimensions to match the video track
+    canvas.width = videoTrack.getSettings().width;
+    canvas.height = videoTrack.getSettings().height;
+
+    // Draw the current video frame on the canvas
+    ctx.drawImage(videoTrack, 0, 0, canvas.width, canvas.height);
+
+    // Convert the canvas to a Blob and set it as the image
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve));
+    setImage(blob);
+    setImageUrl(URL.createObjectURL(blob));
+  } catch (error) {
+    console.error('Error capturing image:', error);
+    // Handle the error, e.g., display an error message to the user
+  }
+};
 
   const identifyPlant = async (file) => {
     if (!file) return;
