@@ -52,7 +52,10 @@ export default function CameraComponent({ onImageCapture }) {
     <div className="w-full">
       <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden">
         {isCameraOpen ? (
-          <video ref={videoRef} autoPlay className="w-full h-full object-cover" />
+          <div>
+            <video ref={videoRef} autoPlay className="w-full h-full object-cover" />
+            <canvas ref={canvasRef} className="hidden" width="640" height="480" />
+          </div>
         ) : imageUrl ? (
           <Image
             src={imageUrl}
@@ -62,7 +65,6 @@ export default function CameraComponent({ onImageCapture }) {
           />
         ) : null}
       </div>
-      <canvas ref={canvasRef} className="hidden" width="640" height="480" />
       <div className="mt-4 flex justify-center">
         {isCameraOpen ? (
           <button
