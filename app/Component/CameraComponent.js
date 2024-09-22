@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import Image from 'next/image';
-export default CameraComponent;
+
 
 export default function CameraComponent({ onImageCapture }) {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
