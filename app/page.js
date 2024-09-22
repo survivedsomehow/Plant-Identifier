@@ -45,7 +45,13 @@ export default function Home() {
   "plantName": "",
   "scientificName": "",
   "description": "",
+  "growthConditions": {
+    "light": "",
+    "water": "",
+    "soil": ""
+  },
   "careInstructions": ""
+}
 }
 
 I'd really appreciate it if you could fill in the details for me! Thanks in advance!`;
