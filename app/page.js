@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import CameraComponent from '../Component/CameraComponent';
+import CameraComponent from './Component/CameraComponent';
 
 export default function Home() {
   const [image, setImage] = useState(null);
