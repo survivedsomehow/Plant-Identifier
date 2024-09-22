@@ -36,22 +36,23 @@ export default function Home() {
     // Request access to the user's camera
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
 
-    // Create a new canvas element
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
     // Get the first video track from the stream
     const videoTrack = stream.getVideoTracks()[0];
 
-    // Set the canvas dimensions to match the video track
-    canvas.width = videoTrack.getSettings().width;
-    canvas.height = videoTrack.getSettings().height;
+    // Get a video frame from the camera
+    const frame = await videoTrack.getVideoFrame();
 
-    // Draw the current video frame on the canvas
-    ctx.drawImage(videoTrack, 0, 0, canvas.width, canvas.height);
+    // Convert the frame to a blob
+    const blob = await frame.createImageBitmap().then((bitmap) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(bitmap, 0, 0);
+      return new Promise((resolve) => canvas.toBlob(resolve));
+    });
 
-    // Convert the canvas to a Blob and set it as the image
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve));
+    // Set the blob as the image
     setImage(blob);
     setImageUrl(URL.createObjectURL(blob));
   } catch (error) {
