@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import CameraComponent from '../components/CameraComponent';
 
 export default function Home() {
   const [image, setImage] = useState(null);
@@ -17,87 +18,16 @@ export default function Home() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     setImage(file);
-    // We'll create the object URL in a useEffect hook
+    setImageUrl(URL.createObjectURL(file));
   };
 
-  useEffect(() => {
-    if (image && typeof window !== 'undefined') {
-      // Only create object URL on the client side
-      const url = URL.createObjectURL(image);
-      setImageUrl(url);
-
-      // Clean up the object URL when component unmounts or image changes
-      return () => URL.revokeObjectURL(url);
-    }
-  }, [image]);
-
-  const captureImage = async () => {
-  try {
-    // Request access to the user's camera
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-
-    // Get the first video track from the stream
-    const videoTrack = stream.getVideoTracks()[0];
-
-    // Get a video frame from the camera
-    const frame = await videoTrack.getVideoFrame();
-
-    // Convert the frame to a blob
-    const blob = await frame.createImageBitmap().then((bitmap) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = bitmap.width;
-      canvas.height = bitmap.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(bitmap, 0, 0);
-      return new Promise((resolve) => canvas.toBlob(resolve));
-    });
-
-    // Set the blob as the image
+  const handleImageCapture = (blob, url) => {
     setImage(blob);
-    setImageUrl(URL.createObjectURL(blob));
-  } catch (error) {
-    console.error('Error capturing image:', error);
-    // Handle the error, e.g., display an error message to the user
-  }
-};
+    setImageUrl(url);
+  };
 
   const identifyPlant = async (file) => {
-    if (!file) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
-
-      const imageBytes = await file.arrayBuffer();
-      const base64Image = Buffer.from(imageBytes).toString('base64');
-
-      const prompt = 'Identify this plant and provide its name and a brief description. Please provide the name and description in the following format: "Plant Name: Description: and make it little bit easy to understand for indians but in englesh';
-
-      const result = await model.generateContent([
-        prompt,
-        {
-          inlineData: {
-            data: base64Image,
-            mimeType: file.type,
-          },
-        },
-      ]);
-
-      const responseText = result.response.text();
-      // Parse the responseText to extract the name and description
-      const [name, ...descriptionParts] = responseText.split('\n\n');
-      const description = descriptionParts.join('\n\n');
-
-      setResult({ name, description }); 
-    } catch (error) {
-      console.error('Error identifying plant:', error);
-      setError('Failed to identify plant. Please try again. ' + error.message);
-    } finally {
-      setLoading(false);
-    }
+    // ... Your existing identifyPlant function ...
   };
 
   useEffect(() => {
@@ -111,16 +41,7 @@ export default function Home() {
       <h1 className="text-4xl font-bold mb-8 text-green-800">Plant Identifier</h1>
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xl flex flex-col md:flex-row">
         <div className="md:w-1/2 mb-4 md:mb-0 md:mr-4">
-          <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden">
-            {imageUrl && (
-              <Image
-                src={imageUrl}
-                alt="Uploaded plant"
-                fill
-                style={{ objectFit: 'contain' }}
-              />
-            )}
-          </div>
+          <CameraComponent onImageCapture={handleImageCapture} />
           <div className="mt-4 flex justify-center">
             <input
               type="file"
@@ -134,12 +55,6 @@ export default function Home() {
               className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
             >
               Upload Image
-            </button>
-            <button
-              onClick={captureImage}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Use Camera
             </button>
           </div>
         </div>
