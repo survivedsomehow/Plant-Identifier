@@ -45,11 +45,6 @@ export default function Home() {
   "plantName": "",
   "scientificName": "",
   "description": "",
-  "growthConditions": {
-    "light": "",
-    "water": "",
-    "soil": ""
-  },
   "careInstructions": ""
 }
 
