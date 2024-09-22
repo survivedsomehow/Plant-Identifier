@@ -35,16 +35,22 @@ export default function CameraComponent({ onImageCapture }) {
   const captureImage = () => {
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext('2d');
-      context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-      canvasRef.current.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        setImageUrl(url);
-        setIsCameraOpen(false);
-        if (videoRef.current.srcObject) {
-          videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-        }
-        onImageCapture(blob, url);
-      });
+      if (context) {
+        context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+        canvasRef.current.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          setImageUrl(url);
+          setIsCameraOpen(false);
+          if (videoRef.current.srcObject) {
+            videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+          }
+          onImageCapture(blob, url);
+        });
+      } else {
+        console.error('Failed to get canvas context');
+      }
+    } else {
+      console.error('Video or canvas ref is null');
     }
   };
 
@@ -75,13 +81,4 @@ export default function CameraComponent({ onImageCapture }) {
           </button>
         ) : (
           <button
-            onClick={openCamera}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Use Camera
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
+           
