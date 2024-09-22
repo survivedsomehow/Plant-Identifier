@@ -10,29 +10,58 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showCamera, setShowCamera] = useState(false);
 
   const fileInputRef = useRef(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const apiKey = "AIzaSyBr1mI21WL76WSKn0zpVRmNCkSuKL9TJvw";
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     setImage(file);
-    // We'll create the object URL in a useEffect hook
   };
 
   useEffect(() => {
     if (image && typeof window !== 'undefined') {
-      // Only create object URL on the client side
       const url = URL.createObjectURL(image);
       setImageUrl(url);
-
-      // Clean up the object URL when component unmounts or image changes
       return () => URL.revokeObjectURL(url);
     }
   }, [image]);
 
+  const startCamera = async () => {
+    setShowCamera(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      console.error("Error accessing camera:", err);
+      setError("Failed to access camera. Please make sure you've granted permission.");
+    }
+  };
+
   const captureImage = () => {
-    // Implement camera access (using MediaDevices API, for example)
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    if (video && canvas) {
+      const context = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob((blob) => {
+        setImage(blob);
+        setImageUrl(URL.createObjectURL(blob));
+        setShowCamera(false);
+
+        // Stop all video streams
+        video.srcObject.getTracks().forEach(track => track.stop());
+      }, 'image/jpeg');
+    }
   };
 
   const identifyPlant = async (file) => {
@@ -61,7 +90,6 @@ export default function Home() {
       ]);
 
       const responseText = result.response.text();
-      // Parse the responseText to extract the name and description
       const [name, ...descriptionParts] = responseText.split('\n\n');
       const description = descriptionParts.join('\n\n');
 
@@ -86,15 +114,18 @@ export default function Home() {
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xl flex flex-col md:flex-row">
         <div className="md:w-1/2 mb-4 md:mb-0 md:mr-4">
           <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden">
-            {imageUrl && (
+            {showCamera ? (
+              <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+            ) : imageUrl ? (
               <Image
                 src={imageUrl}
                 alt="Uploaded plant"
                 fill
                 style={{ objectFit: 'contain' }}
               />
-            )}
+            ) : null}
           </div>
+          <canvas ref={canvasRef} style={{ display: 'none' }} />
           <div className="mt-4 flex justify-center">
             <input
               type="file"
@@ -109,12 +140,21 @@ export default function Home() {
             >
               Upload Image
             </button>
-            <button
-              onClick={captureImage}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Use Camera
-            </button>
+            {showCamera ? (
+              <button
+                onClick={captureImage}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Capture
+              </button>
+            ) : (
+              <button
+                onClick={startCamera}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Use Camera
+              </button>
+            )}
           </div>
         </div>
         <div className="md:w-1/2">
