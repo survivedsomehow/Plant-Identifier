@@ -22,8 +22,12 @@ export default function Home() {
   };
 
   const handleImageCapture = (blob, url) => {
-    setImage(blob);
-    setImageUrl(url);
+    if (blob && url) {
+      setImage(blob);
+      setImageUrl(url);
+    } else {
+      console.error('No image selected');
+    }
   };
 
   const identifyPlant = async (file) => {
@@ -51,7 +55,6 @@ export default function Home() {
     "soil": ""
   },
   "careInstructions": ""
-}
 }
 
 I'd really appreciate it if you could fill in the details for me! Thanks in advance!`;
