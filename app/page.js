@@ -7,6 +7,7 @@ import CameraComponent from './Component/CameraComponent';
 
 export default function Home() {
   const [image, setImage] = useState(null);
+  console.log('Image state:', image);
   const [imageUrl, setImageUrl] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,22 +17,26 @@ export default function Home() {
   const apiKey = "AIzaSyBr1mI21WL76WSKn0zpVRmNCkSuKL9TJvw";
 
   const handleImageUpload = (e) => {
+    console.log('File uploaded:', e.target.files);
     const file = e.target.files[0];
     setImage(file);
     setImageUrl(URL.createObjectURL(file));
   };
 
   const handleImageCapture = (blob, url) => {
+    console.log('Image captured:', blob);
     setImage(blob);
     setImageUrl(url);
   };
 
   const identifyPlant = async (file) => {
-    // ... Your existing identifyPlant function ...
+    console.log('Identifying plant...');
+    // ... rest of your code ...
   };
 
   useEffect(() => {
     if (image) {
+      console.log('Image uploaded:', image);
       identifyPlant(image);
     }
   }, [image]);
@@ -51,7 +56,7 @@ export default function Home() {
               className="hidden"
             />
             <button
-              onClick={() => fileInputRef.current.click()}
+              onClick={() => console.log('Upload button clicked')}
               className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
             >
               Upload Image
@@ -69,8 +74,4 @@ export default function Home() {
               <p className="text-gray-600">{result.description}</p>
             </div>
           )}
-        </div>
-      </div>
-    </div>
-  );
-}
+        </
