@@ -19,21 +19,19 @@ export default function Home() {
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
-    setImage(file);
-  };
-
-  useEffect(() => {
-    if (image && typeof window !== 'undefined') {
-      const url = URL.createObjectURL(image);
+    if (file) {
+      setImage(file);
+      const url = URL.createObjectURL(file);
       setImageUrl(url);
-      return () => URL.revokeObjectURL(url);
     }
-  }, [image]);
+  };
 
   const startCamera = async () => {
     setShowCamera(true);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } }
+      });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
@@ -119,7 +117,7 @@ export default function Home() {
             ) : imageUrl ? (
               <Image
                 src={imageUrl}
-                alt="Uploaded plant"
+                alt="Plant image"
                 fill
                 style={{ objectFit: 'contain' }}
               />
