@@ -15,10 +15,20 @@ export default function CameraComponent({ onImageCapture }) {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.play();
         setIsCameraOpen(true);
       }
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      if (error.name === 'NotFoundError') {
+        console.error('No camera device found:', error);
+        alert('No camera device found. Please ensure that your device has a camera and that camera access is allowed.');
+      } else if (error.name === 'NotAllowedError') {
+        console.error('Camera access denied:', error);
+        alert('Camera access denied. Please allow camera access to use this feature.');
+      } else {
+        console.error('Error accessing camera:', error);
+        alert('An error occurred while accessing the camera. Please try again later.');
+      }
     }
   };
 
