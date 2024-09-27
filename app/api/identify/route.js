@@ -29,21 +29,10 @@ export async function POST(request) {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
 
-    const prompt = `Hey there! Can you help me identify this plant? Please provide the common name, scientific name, a brief description, growth conditions (including light, water, and soil requirements), and any essential care tips. Format your answer like this:
-
-{
-  "plantName": "",
-  "scientificName": "",
-  "description": "",
-  "growthConditions": {
-    "light": "",
-    "water": "",
-    "soil": ""
-  },
-  "careInstructions": ""
-}
-
-I'd really appreciate it if you could fill in the details for me! Thanks in advance!`;
+    const prompt = 'Hey there! Can you help me identify this plant? Please provide the common name, scientific name, a brief description, growth conditions (including light, water, and soil requirements), and any essential care tips. Format your answer like this:{
+        "plantName": "",
+        "scientificName": "",
+        "description": "",';
 
     console.log('Converting image to byte array');
     const imageBytes = await image.arrayBuffer();
