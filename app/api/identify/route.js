@@ -16,7 +16,7 @@ export async function POST(request) {
 
     console.log('Image received:', image.name, image.type, image.size);
 
-    const apiKey = 'const mySecret = process.env.Gemini_API';
+    const apiKey = 'AIzaSyBr1mI21WL76WSKn0zpVRmNCkSuKL9TJvw';
     if (!apiKey) {
       console.error('Google API key is not set');
       return new Response(JSON.stringify({ error: 'Server configuration error' }), {
