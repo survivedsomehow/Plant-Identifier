@@ -15,7 +15,7 @@ export default function Home() {
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const apiKey = "AIzaSyBr1mI21WL76WSKn0zpVRmNCkSuKL9TJvw";
+  const apiKey = process.env.NEXT_PUBLIC_Gemini_API;
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
