@@ -15,8 +15,8 @@ export default function Home() {
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  require('dotenv').config();
-  const apiKey = process.env['NEXT_PUBLIC_Gemini_API'];
+  const apiKey = process.env.NEXT_PUBLIC_Gemini_API;
+
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
